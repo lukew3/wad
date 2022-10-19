@@ -1,0 +1,6 @@
+# Suggestions / Possible New Features
+* Enable playing in reverse by creating a reversed copy
+* OnEnd callback
+* Enable creating duplicates of wads so that the same source doesn't have to be downloaded again
+  * Or just allow reverse natively
+    * It might still be useful to be able to create copies

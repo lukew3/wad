@@ -18624,7 +18624,7 @@ return /******/ (function(modules) { // webpackBootstrap
             writable: true,
             value: {
                 drive: {
-                    value: 1,
+                    value: 0.197,
                     min: 0,
                     max: 1,
                     automatable: true,
@@ -18632,7 +18632,7 @@ return /******/ (function(modules) { // webpackBootstrap
                     scaled: true
                 },
                 outputGain: {
-                    value: 0,
+                    value: -9.154,
                     min: -46,
                     max: 0,
                     automatable: true,
@@ -18640,7 +18640,7 @@ return /******/ (function(modules) { // webpackBootstrap
                     scaled: true
                 },
                 curveAmount: {
-                    value: 0.725,
+                    value: 0.979,
                     min: 0,
                     max: 1,
                     automatable: false,
@@ -18668,7 +18668,7 @@ return /******/ (function(modules) { // webpackBootstrap
                 return this.inputDrive.gain;
             },
             set: function(value) {
-                this._drive = value;
+                this.inputDrive.gain.value = value;
             }
         },
         curveAmount: {
@@ -18717,7 +18717,7 @@ return /******/ (function(modules) { // webpackBootstrap
                     var i, x, y;
                     for (i = 0; i < n_samples; i++) {
                         x = i * 2 / n_samples - 1;
-                        y = ((0.5 * Math.pow((x + 1.4), 2)) - 1) * y >= 0 ? 5.8 : 1.2;
+                        y = ((0.5 * Math.pow((x + 1.4), 2)) - 1) * (y >= 0 ? 5.8 : 1.2);
                         ws_table[i] = tanh(y);
                     }
                 },
@@ -18734,9 +18734,13 @@ return /******/ (function(modules) { // webpackBootstrap
                     for (i = 0; i < n_samples; i++) {
                         x = i * 2 / n_samples - 1;
                         abx = Math.abs(x);
-                        if (abx < a) y = abx;
-                        else if (abx > a) y = a + (abx - a) / (1 + Math.pow((abx - a) / (1 - a), 2));
-                        else if (abx > 1) y = abx;
+                        if (abx < a) {
+                            y = abx;
+                        } else if (abx > a) {
+                            y = a + (abx - a) / (1 + Math.pow((abx - a) / (1 - a), 2));
+                        } else if (abx > 1) {
+                            y = abx;
+                        }
                         ws_table[i] = sign(x) * y * (1 / ((a + 1) / 2));
                     }
                 },
@@ -19259,35 +19263,35 @@ return /******/ (function(modules) { // webpackBootstrap
                     type: BOOLEAN
                 },
                 baseFrequency: {
-                    value: 0.5,
+                    value: 0.153,
                     min: 0,
                     max: 1,
                     automatable: false,
                     type: FLOAT
                 },
                 excursionOctaves: {
-                    value: 2,
+                    value: 3.3,
                     min: 1,
                     max: 6,
                     automatable: false,
                     type: FLOAT
                 },
                 sweep: {
-                    value: 0.2,
+                    value: 0.35,
                     min: 0,
                     max: 1,
                     automatable: false,
                     type: FLOAT
                 },
                 resonance: {
-                    value: 10,
+                    value: 19,
                     min: 1,
                     max: 100,
                     automatable: false,
                     type: FLOAT
                 },
                 sensitivity: {
-                    value: 0.5,
+                    value: -0.5,
                     min: -1,
                     max: 1,
                     automatable: false,
@@ -19520,20 +19524,14 @@ return /******/ (function(modules) { // webpackBootstrap
                     channels = event.inputBuffer.numberOfChannels,
                     current, chan, rms, i;
                 chan = rms = i = 0;
-                if (channels > 1) { //need to mixdown
+
+                for(chan = 0; chan < channels; ++chan) {
                     for (i = 0; i < count; ++i) {
-                        for (; chan < channels; ++chan) {
-                            current = event.inputBuffer.getChannelData(chan)[i];
-                            rms += (current * current) / channels;
-                        }
-                    }
-                } else {
-                    for (i = 0; i < count; ++i) {
-                        current = event.inputBuffer.getChannelData(0)[i];
+                        current = event.inputBuffer.getChannelData(chan)[i];
                         rms += (current * current);
                     }
                 }
-                rms = Math.sqrt(rms);
+                rms = Math.sqrt(rms / channels);
 
                 if (this._envelope < rms) {
                     this._envelope *= this._attackC;
@@ -21657,7 +21655,7 @@ class Wad {
 	 * @property {number} [offset] - Where in the audio clip playback begins, measured in seconds from the start of the audio clip.
 	 * @property {boolean} [loop] - If true, the audio will loop. This parameter only works for audio clips, and does nothing for oscillators.
 	 * @property {object} [tuna] - Add effects from Tuna.js to this wad. Check out the Tuna.js documentation for more information.
-	 * @property {number} [rate] - Where in the audio clip playback begins, measured in seconds from the start of the audio clip.
+	 * @property {number} [rate] - Speed at which audio is played. 1 is normal speed. 2 is twice as fast. 0.5 is half speed.
 	 * @property {object} [sprite] - Each key is the name of a sprite. The value is a two-element array, containing the start and end time of that sprite, in seconds. 
 	 * @property {FilterConfig|FilterConfig[]} [filter] - Pass an object to add a filter to this wad, or pass an array of objects to add multiple filters to this wad.
 	 * @property {VibratoConfig} [vibrato] - A vibrating pitch effect. Only works for oscillators.
@@ -21709,6 +21707,11 @@ class Wad {
 		/** If the Wad's source is the microphone, the rest of the setup happens here. **/
 		else if ( this.source === 'mic' ) {
 			Object(_common__WEBPACK_IMPORTED_MODULE_2__["getConsent"])(this, arg);
+		}
+
+		/** If the Wad is being given an array as a source, set the decodedBuffer to source **/
+		else if ( Array.isArray(this.source) ) {
+			this.decodedBuffer = this.source;
 		}
 
 		/** If the source is not a pre-defined value, assume it is a URL for an audio file, and grab it now. **/

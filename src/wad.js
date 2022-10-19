@@ -116,7 +116,7 @@ class Wad {
 	 * @property {number} [offset] - Where in the audio clip playback begins, measured in seconds from the start of the audio clip.
 	 * @property {boolean} [loop] - If true, the audio will loop. This parameter only works for audio clips, and does nothing for oscillators.
 	 * @property {object} [tuna] - Add effects from Tuna.js to this wad. Check out the Tuna.js documentation for more information.
-	 * @property {number} [rate] - Where in the audio clip playback begins, measured in seconds from the start of the audio clip.
+	 * @property {number} [rate] - Speed at which audio is played. 1 is normal speed. 2 is twice as fast. 0.5 is half speed.
 	 * @property {object} [sprite] - Each key is the name of a sprite. The value is a two-element array, containing the start and end time of that sprite, in seconds. 
 	 * @property {FilterConfig|FilterConfig[]} [filter] - Pass an object to add a filter to this wad, or pass an array of objects to add multiple filters to this wad.
 	 * @property {VibratoConfig} [vibrato] - A vibrating pitch effect. Only works for oscillators.
@@ -168,6 +168,11 @@ class Wad {
 		/** If the Wad's source is the microphone, the rest of the setup happens here. **/
 		else if ( this.source === 'mic' ) {
 			getConsent(this, arg);
+		}
+
+		/** If the Wad is being given an array as a source, set the decodedBuffer to source **/
+		else if ( Array.isArray(this.source) ) {
+			this.decodedBuffer = this.source;
 		}
 
 		/** If the source is not a pre-defined value, assume it is a URL for an audio file, and grab it now. **/
