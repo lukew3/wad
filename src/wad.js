@@ -161,8 +161,6 @@ class Wad {
 		this.duration = (this.env.attack + this.env.decay + this.env.hold + this.env.release) * (1/(this.rate)) * 1000;
 		this.constructExternalFx(arg, context);
 
-		console.log(typeof(this.source) );
-		console.log(this.source);
 		/** If the Wad's source is noise, set the Wad's buffer to the noise buffer we created earlier. **/
 		if ( this.source === 'noise' ) {
 			this.decodedBuffer = noiseBuffer;
@@ -174,7 +172,7 @@ class Wad {
 		}
 
 		/** If the Wad is being given an AudioBuffer as source, clone it and set **/
-		else if ( typeof(this.source) !== 'string' ) {
+		else if ( this.source.constructor.name === 'AudioBuffer' ) {
 			this.decodedBuffer = cloneAudioBuffer(this.source);
 			if ( this.env.hold === 3.14159 ) { // audio buffers should not use the default hold
 				this.defaultEnv.hold = this.decodedBuffer.duration * ( 1 / this.rate );
