@@ -27,6 +27,7 @@ import {
 	filterEnv,
 	playEnv,
 	setUpOscillator,
+	cloneAudioBuffer
 } from './common';
 import _ from 'lodash';
 
@@ -160,6 +161,8 @@ class Wad {
 		this.duration = (this.env.attack + this.env.decay + this.env.hold + this.env.release) * (1/(this.rate)) * 1000;
 		this.constructExternalFx(arg, context);
 
+		console.log(typeof(this.source) );
+		console.log(this.source);
 		/** If the Wad's source is noise, set the Wad's buffer to the noise buffer we created earlier. **/
 		if ( this.source === 'noise' ) {
 			this.decodedBuffer = noiseBuffer;
@@ -171,8 +174,8 @@ class Wad {
 		}
 
 		/** If the Wad is being given an array as a source, set the decodedBuffer to source **/
-		else if ( Array.isArray(this.source) ) {
-			this.decodedBuffer = this.source;
+		else if ( typeof(this.source) !== 'string' ) {
+			this.decodedBuffer = cloneAudioBuffer(this.source);
 		}
 
 		/** If the source is not a pre-defined value, assume it is a URL for an audio file, and grab it now. **/

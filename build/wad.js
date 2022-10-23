@@ -19775,7 +19775,7 @@ class AudioListener{
 /*!***********************!*\
   !*** ./src/common.js ***!
   \***********************/
-/*! exports provided: logStats, logMessage, context, noiseBuffer, constructEnv, constructFilter, requestAudioFile, constructVibrato, constructTremolo, constructReverb, constructPanning, constructDelay, constructCompressor, getConsent, permissionsGranted, setUpMic, setUpPanningOnPlay, setUpVibratoOnPlay, setUpTremoloOnPlay, setUpDelayOnPlay, setUpTunaOnPlay, plugEmIn, setUpEnvOnPlay, setUpFilterOnPlay, setUpReverbOnPlay, filterEnv, playEnv, setUpOscillator, createFilters */
+/*! exports provided: logStats, logMessage, context, noiseBuffer, constructEnv, constructFilter, requestAudioFile, constructVibrato, constructTremolo, constructReverb, constructPanning, constructDelay, constructCompressor, getConsent, permissionsGranted, setUpMic, setUpPanningOnPlay, setUpVibratoOnPlay, setUpTremoloOnPlay, setUpDelayOnPlay, setUpTunaOnPlay, plugEmIn, setUpEnvOnPlay, setUpFilterOnPlay, setUpReverbOnPlay, filterEnv, playEnv, setUpOscillator, createFilters, cloneAudioBuffer */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -19809,6 +19809,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playEnv", function() { return playEnv; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setUpOscillator", function() { return setUpOscillator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createFilters", function() { return createFilters; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cloneAudioBuffer", function() { return cloneAudioBuffer; });
 /* harmony import */ var tunajs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tunajs */ "./node_modules/tunajs/tuna.js");
 /* harmony import */ var tunajs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(tunajs__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _polywad__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./polywad */ "./src/polywad.js");
@@ -20405,6 +20406,19 @@ let setUpTunaOnPlay = function(that, arg){
 		that.nodes.push(tunaEffect);
 	}
 };
+
+let cloneAudioBuffer = (fromAudioBuffer) => {
+	const audioBuffer = new AudioBuffer({
+	  	length:fromAudioBuffer.length, 
+	  	numberOfChannels:fromAudioBuffer.numberOfChannels, 
+	  	sampleRate:fromAudioBuffer.sampleRate
+	});
+	for(let channelI = 0; channelI < audioBuffer.numberOfChannels; ++channelI) {
+	  	const samples = fromAudioBuffer.getChannelData(channelI);
+	  	audioBuffer.copyToChannel(samples, channelI);
+	}
+	return audioBuffer;
+}
 
 
 
@@ -21609,6 +21623,8 @@ class Wad {
 		this.duration = (this.env.attack + this.env.decay + this.env.hold + this.env.release) * (1/(this.rate)) * 1000;
 		this.constructExternalFx(arg, _common__WEBPACK_IMPORTED_MODULE_2__["context"]);
 
+		console.log(typeof(this.source) );
+		console.log(this.source);
 		/** If the Wad's source is noise, set the Wad's buffer to the noise buffer we created earlier. **/
 		if ( this.source === 'noise' ) {
 			this.decodedBuffer = _common__WEBPACK_IMPORTED_MODULE_2__["noiseBuffer"];
@@ -21620,8 +21636,8 @@ class Wad {
 		}
 
 		/** If the Wad is being given an array as a source, set the decodedBuffer to source **/
-		else if ( Array.isArray(this.source) ) {
-			this.decodedBuffer = this.source;
+		else if ( typeof(this.source) !== 'string' ) {
+			this.decodedBuffer = Object(_common__WEBPACK_IMPORTED_MODULE_2__["cloneAudioBuffer"])(this.source);
 		}
 
 		/** If the source is not a pre-defined value, assume it is a URL for an audio file, and grab it now. **/
