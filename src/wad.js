@@ -173,9 +173,14 @@ class Wad {
 			getConsent(this, arg);
 		}
 
-		/** If the Wad is being given an array as a source, set the decodedBuffer to source **/
+		/** If the Wad is being given an AudioBuffer as source, clone it and set **/
 		else if ( typeof(this.source) !== 'string' ) {
 			this.decodedBuffer = cloneAudioBuffer(this.source);
+			if ( this.env.hold === 3.14159 ) { // audio buffers should not use the default hold
+				this.defaultEnv.hold = this.decodedBuffer.duration * ( 1 / this.rate );
+				this.env.hold = this.decodedBuffer.duration * ( 1 / this.rate );
+			}
+			this.duration = this.env.hold * 1000;
 		}
 
 		/** If the source is not a pre-defined value, assume it is a URL for an audio file, and grab it now. **/
